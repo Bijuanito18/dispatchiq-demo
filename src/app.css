@@ -668,3 +668,278 @@ body {
     grid-template-columns: 1fr;
   }
 }
+/* Tech portal header & layout */
+
+.tech-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.section-intro.small {
+  font-size: 0.8rem;
+  max-width: 28rem;
+}
+
+.tech-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.btn.subtle {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+}
+
+/* Tabs row + search */
+
+.tech-tabs-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.tech-search {
+  flex: 0 0 220px;
+}
+
+/* Low stock bar */
+
+.low-stock-bar {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(15, 23, 42, 0.85);
+  margin-bottom: 1rem;
+}
+
+.low-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fecaca;
+  white-space: nowrap;
+}
+
+.low-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.chip {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+}
+
+.chip-low {
+  background: #450a0a;
+  color: #fecaca;
+  border-color: #f97373cc;
+}
+
+.chip-ok {
+  background: #022c22;
+  color: #bbf7d0;
+  border-color: #22c55ecc;
+}
+
+/* Dashboard summary cards */
+
+.summary-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.summary-card {
+  border-radius: 0.9rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.summary-label {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.summary-card small {
+  display: block;
+  font-size: 0.7rem;
+  color: #6b7280;
+}
+
+/* Work order board */
+
+.wo-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.9rem;
+  margin-top: 0.75rem;
+}
+
+.wo-card {
+  border-radius: 0.9rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: rgba(15, 23, 42, 0.9);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.new-wo-card {
+  border-style: dashed;
+}
+
+.wo-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.wo-header h2 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.wo-title {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.wo-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.pill-status {
+  background: #0f172a;
+  color: #e5e7eb;
+  border: 1px solid rgba(148, 163, 184, 0.8);
+}
+
+.pill-stage {
+  background: #0b1120;
+  color: #a5b4fc;
+  border: 1px solid rgba(129, 140, 248, 0.7);
+}
+
+.pill-ok {
+  background: #022c22;
+  color: #bbf7d0;
+  border: 1px solid #22c55ecc;
+}
+
+.wo-meta {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.wo-meta p {
+  margin: 0.1rem 0 0;
+}
+
+.wo-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.wo-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 150px;
+}
+
+.wo-control label {
+  font-size: 0.7rem;
+  color: #9ca3af;
+}
+
+/* Technicians row */
+
+.tech-card-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem;
+  margin-top: 0.75rem;
+}
+
+.tech-card {
+  border-radius: 0.9rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.tech-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tech-card-header h2 {
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.tech-role {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-top: 0.35rem;
+}
+
+/* Parts board */
+
+.part-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem;
+  margin-top: 0.75rem;
+}
+
+.part-card {
+  border-radius: 0.9rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.part-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.part-header h2 {
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.part-actions {
+  margin-top: 0.4rem;
+  display: flex;
+  gap: 0.35rem;
+}

@@ -102,7 +102,7 @@ function findJobByQuery(jobs, query) {
 
 function App() {
   // which main page we are on
-  const [view, setView] = useState('customer'); // 'customer' | 'ops' | 'tech';
+  const [view, setView] = useState('customer'); // 'customer' | 'ops' | 'tech'
 
   // data for work orders, techs, and parts
   const [workOrders, setWorkOrders] = useState(INITIAL_WORK_ORDERS);
@@ -115,7 +115,7 @@ function App() {
   const [statusSearched, setStatusSearched] = useState(false);
 
   // tech portal tab
-  const [techTab, setTechTab] = useState('dashboard'); // 'dashboard' | 'workorders' | 'technicians' | 'parts';
+  const [techTab, setTechTab] = useState('dashboard'); // 'dashboard' | 'workorders' | 'technicians' | 'parts'
 
   // new work order form
   const [newOrder, setNewOrder] = useState({
@@ -201,6 +201,16 @@ function App() {
     setParts((prev) =>
       prev.map((p) =>
         p.id === id ? { ...p, inStock: p.inStock + 1 } : p
+      )
+    );
+  };
+
+  const handlePartsUse = (id) => {
+    setParts((prev) =>
+      prev.map((p) =>
+        p.id === id && p.inStock > 0
+          ? { ...p, inStock: p.inStock - 1 }
+          : p
       )
     );
   };
@@ -348,10 +358,7 @@ function App() {
             </div>
           </main>
 
-          {/* ABOUT NTFR (short version) */}
-          
-
-          {/* SERVICE PROMISE (still on homepage, no nav link) */}
+          {/* SERVICE PROMISE */}
           <section className="section alt">
             <h2>Our Service Promise</h2>
             <div className="grid">
@@ -385,284 +392,292 @@ function App() {
         </>
       )}
 
-      {/* OPS / ABOUT PAGE */}     
-{view === 'ops' && (
-  <>
-    <main className="section">
-      <h1>About North Texas Fleet &amp; Refrigeration</h1>
-      <p className="section-intro">
-        NTFR started as a small two-truck operation focused on keeping
-        local delivery fleets running. Today we support carriers,
-        distributors, and grocers across North Texas.
-      </p>
+      {/* OPS / ABOUT PAGE */}
+      {view === 'ops' && (
+        <>
+          <main className="section">
+            <h1>About North Texas Fleet &amp; Refrigeration</h1>
+            <p className="section-intro">
+              NTFR started as a small two-truck operation focused on keeping
+              local delivery fleets running. Today we support carriers,
+              distributors, and grocers across North Texas.
+            </p>
 
-      <div className="grid">
-        <div className="card">
-          <h3>Reefer &amp; HVAC Specialists</h3>
-          <p>
-            Our techs focus on refrigerated trailers, truck units, and dock
-            equipment. That focus means faster diagnostics and less
-            downtime.
-          </p>
-        </div>
+            <div className="grid">
+              <div className="card">
+                <h3>Reefer &amp; HVAC Specialists</h3>
+                <p>
+                  Our techs focus on refrigerated trailers, truck units, and dock
+                  equipment. That focus means faster diagnostics and less
+                  downtime.
+                </p>
+              </div>
 
-        <div className="card">
-          <h3>Local, Family-Owned</h3>
-          <p>
-            Based in North Texas, we understand the heat, traffic, and
-            schedules your fleet faces every day.
-          </p>
-        </div>
-      </div>
-    </main>
+              <div className="card">
+                <h3>Local, Family-Owned</h3>
+                <p>
+                  Based in North Texas, we understand the heat, traffic, and
+                  schedules your fleet faces every day.
+                </p>
+              </div>
+            </div>
+          </main>
 
-    <footer className="footer">
-      <p>Learn more about the history & mission of NTFR.</p>
-    </footer>
-  </>
-)}
-
+          <footer className="footer">
+            <p>Learn more about the history &amp; mission of NTFR.</p>
+          </footer>
+        </>
+      )}
 
       {/* TECH & PARTS PORTAL */}
       {view === 'tech' && (
         <>
           <main className="section tech-section">
-            <h1>Technician &amp; Parts Portal</h1>
-            <p className="section-intro">
-              Internal tooling for technicians, dispatch, and parts coordinators.
-              This demo shows how DispatchIQ could organize daily work.
-            </p>
+            {/* Top header bar */}
+            <div className="tech-header">
+              <div>
+                <h1>DispatchIQ Demo – NTFR</h1>
+                <p className="section-intro small">
+                  Create &amp; assign work orders, track status, manage parts, and
+                  keep your cold chain moving.
+                </p>
+              </div>
+              <div className="tech-actions">
+                <button className="btn subtle">+ New Work Order</button>
+                <button className="btn subtle">Import</button>
+                <button className="btn subtle">Export</button>
+                <button className="btn subtle">Reset</button>
+              </div>
+            </div>
 
-            {/* TABS */}
-            <div className="tech-tabs">
-              <button
-                className={`tab-button ${
-                  techTab === 'dashboard' ? 'active' : ''
-                }`}
-                onClick={() => setTechTab('dashboard')}
-              >
-                Dashboard
-              </button>
-              <button
-                className={`tab-button ${
-                  techTab === 'workorders' ? 'active' : ''
-                }`}
-                onClick={() => setTechTab('workorders')}
-              >
-                Work Orders
-              </button>
-              <button
-                className={`tab-button ${
-                  techTab === 'technicians' ? 'active' : ''
-                }`}
-                onClick={() => setTechTab('technicians')}
-              >
-                Technicians
-              </button>
-              <button
-                className={`tab-button ${
-                  techTab === 'parts' ? 'active' : ''
-                }`}
-                onClick={() => setTechTab('parts')}
-              >
-                Parts
-              </button>
+            {/* Tabs + search row */}
+            <div className="tech-tabs-row">
+              <div className="tech-tabs">
+                <button
+                  className={`tab-button ${
+                    techTab === 'workorders' ? 'active' : ''
+                  }`}
+                  onClick={() => setTechTab('workorders')}
+                >
+                  Work Orders
+                </button>
+                <button
+                  className={`tab-button ${
+                    techTab === 'technicians' ? 'active' : ''
+                  }`}
+                  onClick={() => setTechTab('technicians')}
+                >
+                  Technicians
+                </button>
+                <button
+                  className={`tab-button ${
+                    techTab === 'parts' ? 'active' : ''
+                  }`}
+                  onClick={() => setTechTab('parts')}
+                >
+                  Parts
+                </button>
+                <button
+                  className={`tab-button ${
+                    techTab === 'dashboard' ? 'active' : ''
+                  }`}
+                  onClick={() => setTechTab('dashboard')}
+                >
+                  Dashboard
+                </button>
+              </div>
+
+              <div className="tech-search">
+                <input
+                  className="status-input"
+                  placeholder="Search (demo only)"
+                  disabled
+                />
+              </div>
+            </div>
+
+            {/* Low stock alerts */}
+            <div className="low-stock-bar">
+              <span className="low-label">Low Stock Alerts</span>
+              <div className="low-chips">
+                {parts.filter((p) => p.inStock < p.minStock).length === 0 && (
+                  <span className="chip chip-ok">No low stock items</span>
+                )}
+                {parts
+                  .filter((p) => p.inStock < p.minStock)
+                  .map((p) => (
+                    <span key={p.id} className="chip chip-low">
+                      {p.name} · On hand {p.inStock} (min {p.minStock})
+                    </span>
+                  ))}
+              </div>
             </div>
 
             {/* DASHBOARD TAB */}
             {techTab === 'dashboard' && (
-              <div className="tech-grid">
-                <div className="card">
-                  <h2>Work Order Overview</h2>
-                  <div className="dashboard-stats">
-                    <div className="stat-tile">
-                      <span className="stat-label">Open</span>
-                      <strong>{openCount}</strong>
-                    </div>
-                    <div className="stat-tile">
-                      <span className="stat-label">In Progress</span>
-                      <strong>{inProgressCount}</strong>
-                    </div>
-                    <div className="stat-tile">
-                      <span className="stat-label">Completed</span>
-                      <strong>{completedCount}</strong>
-                    </div>
-                  </div>
+              <section className="summary-row">
+                <div className="summary-card">
+                  <span className="summary-label">Total Work Orders</span>
+                  <strong>{workOrders.length}</strong>
                 </div>
-
-                <div className="tech-side">
-                  <div className="card">
-                    <h3>Technician Snapshot</h3>
-                    <ul className="bullet-list">
-                      {techs.map((t) => (
-                        <li key={t.id}>
-                          <strong>{t.name}</strong> – {t.status}
-                          {t.currentOrder && (
-                            <>
-                              {' '}
-                              · RO:{' '}
-                              <span className="pill pill-ro">
-                                {t.currentOrder}
-                              </span>
-                            </>
-                          )}
-                          <br />
-                          <small>Location: {t.location}</small>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="card">
-                    <h3>Parts Summary</h3>
-                    <p className="table-caption">
-                      Low stock items: {lowStockCount}
-                    </p>
-                    <ul className="bullet-list">
-                      {parts
-                        .filter((p) => p.inStock < p.minStock)
-                        .map((p) => (
-                          <li key={p.id}>
-                            <strong>{p.name}</strong> – In stock {p.inStock} /
-                            Min {p.minStock}
-                          </li>
-                        ))}
-                      {lowStockCount === 0 && (
-                        <li>All critical parts are above minimum stock.</li>
-                      )}
-                    </ul>
-                  </div>
+                <div className="summary-card">
+                  <span className="summary-label">In Progress</span>
+                  <strong>{inProgressCount}</strong>
                 </div>
-              </div>
+                <div className="summary-card">
+                  <span className="summary-label">Completed</span>
+                  <strong>{completedCount}</strong>
+                </div>
+                <div className="summary-card">
+                  <span className="summary-label">Low Stock Items</span>
+                  <strong>{lowStockCount}</strong>
+                </div>
+              </section>
             )}
 
             {/* WORK ORDERS TAB */}
             {techTab === 'workorders' && (
-              <div className="tech-grid">
-                <div className="card wide">
-                  <h2>Active Repair Orders</h2>
-                  <p className="table-caption">
-                    Update status, stage, and technician assignment.
-                  </p>
-                  <div className="table-wrapper">
-                    <table className="data-table">
-                      <thead>
-                        <tr>
-                          <th>RO #</th>
-                          <th>Customer</th>
-                          <th>Unit</th>
-                          <th>Status</th>
-                          <th>Stage</th>
-                          <th>Priority</th>
-                          <th>Assigned Tech</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {workOrders.map((wo) => (
-                          <tr key={wo.id}>
-                            <td>{wo.id}</td>
-                            <td>{wo.customer}</td>
-                            <td>{wo.unitId}</td>
-                            <td>
-                              <select
-                                value={wo.status}
-                                onChange={(e) =>
-                                  handleOrderStatusChange(wo.id, e.target.value)
-                                }
-                              >
-                                <option value="Open">Open</option>
-                                <option value="In Progress">
-                                  In Progress
-                                </option>
-                                <option value="Completed">Completed</option>
-                              </select>
-                            </td>
-                            <td>
-                              <select
-                                value={wo.stage}
-                                onChange={(e) =>
-                                  handleOrderStageChange(wo.id, e.target.value)
-                                }
-                              >
-                                <option>Scheduled</option>
-                                <option>On Route</option>
-                                <option>On Site</option>
-                                <option>Diagnostics</option>
-                                <option>Repair</option>
-                                <option>Closed</option>
-                              </select>
-                            </td>
-                            <td>{wo.priority}</td>
-                            <td>
-                              <select
-                                value={wo.assignedTech}
-                                onChange={(e) =>
-                                  handleOrderAssignTech(wo.id, e.target.value)
-                                }
-                              >
-                                <option value="Unassigned">Unassigned</option>
-                                {techs.map((t) => (
-                                  <option key={t.id} value={t.name}>
-                                    {t.name}
-                                  </option>
-                                ))}
-                              </select>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+              <section className="wo-board">
+                {workOrders.map((wo) => (
+                  <article className="wo-card" key={wo.id}>
+                    <header className="wo-header">
+                      <div>
+                        <h2>{wo.id}</h2>
+                        <p className="wo-title">
+                          {wo.customer} · {wo.unitId}
+                        </p>
+                      </div>
+                      <div className="wo-header-right">
+                        <span className="pill pill-status">{wo.status}</span>
+                        <span className="pill pill-stage">{wo.stage}</span>
+                      </div>
+                    </header>
 
-                <div className="tech-side">
-                  <div className="card">
-                    <h3>New Work Order</h3>
-                    <form
-                      className="status-form"
-                      onSubmit={handleNewOrderSubmit}
-                    >
+                    <div className="wo-meta">
+                      <div>
+                        <span className="summary-label">ETA</span>
+                        <p>{wo.eta}</p>
+                      </div>
+                      <div>
+                        <span className="summary-label">Priority</span>
+                        <p>{wo.priority}</p>
+                      </div>
+                    </div>
+
+                    <div className="wo-controls">
+                      <div className="wo-control">
+                        <label>Status</label>
+                        <select
+                          value={wo.status}
+                          onChange={(e) =>
+                            handleOrderStatusChange(wo.id, e.target.value)
+                          }
+                        >
+                          <option value="Open">Open</option>
+                          <option value="In Progress">In Progress</option>
+                          <option value="Completed">Completed</option>
+                        </select>
+                      </div>
+
+                      <div className="wo-control">
+                        <label>Stage</label>
+                        <select
+                          value={wo.stage}
+                          onChange={(e) =>
+                            handleOrderStageChange(wo.id, e.target.value)
+                          }
+                        >
+                          <option>Scheduled</option>
+                          <option>On Route</option>
+                          <option>On Site</option>
+                          <option>Diagnostics</option>
+                          <option>Repair</option>
+                          <option>Closed</option>
+                        </select>
+                      </div>
+
+                      <div className="wo-control">
+                        <label>Technician</label>
+                        <select
+                          value={wo.assignedTech}
+                          onChange={(e) =>
+                            handleOrderAssignTech(wo.id, e.target.value)
+                          }
+                        >
+                          <option value="Unassigned">Unassigned</option>
+                          {techs.map((t) => (
+                            <option key={t.id} value={t.name}>
+                              {t.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+
+                {/* New work order card */}
+                <article className="wo-card new-wo-card">
+                  <header className="wo-header">
+                    <div>
+                      <h2>New Work Order</h2>
+                      <p className="wo-title">Schedule a unit for service</p>
+                    </div>
+                  </header>
+
+                  <form className="wo-controls" onSubmit={handleNewOrderSubmit}>
+                    <div className="wo-control">
+                      <label>Customer</label>
                       <input
                         className="status-input"
-                        placeholder="Customer name"
                         value={newOrder.customer}
                         onChange={(e) =>
                           handleNewOrderChange('customer', e.target.value)
                         }
+                        placeholder="Customer name"
                       />
+                    </div>
+                    <div className="wo-control">
+                      <label>Unit</label>
                       <input
                         className="status-input"
-                        placeholder="Unit (Trailer 410, Truck 22, etc.)"
                         value={newOrder.unitId}
                         onChange={(e) =>
                           handleNewOrderChange('unitId', e.target.value)
                         }
+                        placeholder="Trailer / Truck / Dock"
                       />
+                    </div>
+                    <div className="wo-control">
+                      <label>ETA / Scheduled</label>
                       <input
                         className="status-input"
-                        placeholder="ETA or scheduled time"
                         value={newOrder.eta}
                         onChange={(e) =>
                           handleNewOrderChange('eta', e.target.value)
                         }
+                        placeholder="e.g. Today 3:30 PM"
                       />
+                    </div>
+                    <div className="wo-control">
+                      <label>Technician</label>
                       <select
                         className="status-input"
                         value={newOrder.assignedTech}
                         onChange={(e) =>
-                          handleNewOrderChange(
-                            'assignedTech',
-                            e.target.value
-                          )
+                          handleNewOrderChange('assignedTech', e.target.value)
                         }
                       >
-                        <option value="">Assign technician (optional)</option>
+                        <option value="">Unassigned</option>
                         {techs.map((t) => (
                           <option key={t.id} value={t.name}>
                             {t.name}
                           </option>
                         ))}
                       </select>
+                    </div>
+                    <div className="wo-control">
+                      <label>Priority</label>
                       <select
                         className="status-input"
                         value={newOrder.priority}
@@ -674,133 +689,89 @@ function App() {
                         <option value="High">High</option>
                         <option value="Critical">Critical</option>
                       </select>
-                      <button type="submit" className="btn primary full">
-                        Add Work Order
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              </div>
+                    </div>
+
+                    <button type="submit" className="btn primary full">
+                      Add Work Order
+                    </button>
+                  </form>
+                </article>
+              </section>
             )}
 
             {/* TECHNICIANS TAB */}
             {techTab === 'technicians' && (
-              <div className="tech-grid">
-                <div className="card wide">
-                  <h2>Technician Board</h2>
-                  <p className="table-caption">
-                    Shows which job each tech is clocked into.
-                  </p>
-                  <div className="table-wrapper">
-                    <table className="data-table">
-                      <thead>
-                        <tr>
-                          <th>Tech</th>
-                          <th>Status</th>
-                          <th>Current RO</th>
-                          <th>Location</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {techs.map((t) => (
-                          <tr key={t.id}>
-                            <td>{t.name}</td>
-                            <td>{t.status}</td>
-                            <td>{t.currentOrder || '-'}</td>
-                            <td>{t.location}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                <div className="tech-side">
-                  <div className="card">
-                    <h3>How This Could Work Live</h3>
-                    <ul className="bullet-list">
-                      <li>Techs clock into jobs on their phones.</li>
-                      <li>Board updates in real-time for dispatch.</li>
-                      <li>Helps balance workloads and route efficiency.</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
+              <section className="tech-card-row">
+                {techs.map((t) => (
+                  <article key={t.id} className="tech-card">
+                    <header className="tech-card-header">
+                      <h2>{t.name}</h2>
+                      <span
+                        className={`pill ${
+                          t.status === 'On Job' ? 'pill-status' : 'pill-ok'
+                        }`}
+                      >
+                        {t.status}
+                      </span>
+                    </header>
+                    <p className="tech-role">Reefer / HVAC Technician</p>
+                    <p className="summary-label">
+                      Current RO: {t.currentOrder || 'None'}
+                    </p>
+                    <p className="summary-label">Location: {t.location}</p>
+                  </article>
+                ))}
+              </section>
             )}
 
             {/* PARTS TAB */}
             {techTab === 'parts' && (
-              <div className="tech-grid">
-                <div className="card wide">
-                  <h2>Parts Inventory</h2>
-                  <p className="table-caption">
-                    Track stock, see low items, and mock-order parts.
-                  </p>
-                  <div className="table-wrapper">
-                    <table className="data-table">
-                      <thead>
-                        <tr>
-                          <th>Part</th>
-                          <th>In Stock</th>
-                          <th>Min Stock</th>
-                          <th>Status</th>
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {parts.map((p) => {
-                          const isLow = p.inStock < p.minStock;
-                          return (
-                            <tr key={p.id}>
-                              <td>{p.name}</td>
-                              <td>{p.inStock}</td>
-                              <td>{p.minStock}</td>
-                              <td>
-                                <span
-                                  className={
-                                    isLow ? 'pill pill-low' : 'pill pill-ok'
-                                  }
-                                >
-                                  {isLow ? 'Low' : 'OK'}
-                                </span>
-                              </td>
-                              <td>
-                                <button
-                                  className="mini-btn"
-                                  type="button"
-                                  onClick={() => handlePartsOrder(p.id)}
-                                >
-                                  Order +1
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                <div className="tech-side">
-                  <div className="card">
-                    <h3>Next Steps in a Real System</h3>
-                    <ul className="bullet-list">
-                      <li>Connect to a real SQL or Cosmos DB inventory.</li>
-                      <li>
-                        Auto-create purchase orders when stock drops below min.
-                      </li>
-                      <li>
-                        Tie usage to each RO for accurate job costing.
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
+              <section className="part-board">
+                {parts.map((p) => {
+                  const isLow = p.inStock < p.minStock;
+                  return (
+                    <article key={p.id} className="part-card">
+                      <header className="part-header">
+                        <h2>{p.name}</h2>
+                        <span
+                          className={`pill ${
+                            isLow ? 'pill-low' : 'pill-ok'
+                          }`}
+                        >
+                          {isLow ? 'Low' : 'OK'}
+                        </span>
+                      </header>
+                      <p className="summary-label">
+                        On hand: {p.inStock} (min {p.minStock})
+                      </p>
+                      <div className="part-actions">
+                        <button
+                          type="button"
+                          className="mini-btn"
+                          onClick={() => handlePartsOrder(p.id)}
+                        >
+                          +1
+                        </button>
+                        <button
+                          type="button"
+                          className="mini-btn"
+                          onClick={() => handlePartsUse(p.id)}
+                        >
+                          -1
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </section>
             )}
           </main>
 
           <footer className="footer">
-            <p>Internal NTFR tools view (demo only).</p>
+            <p>
+              Demo only — a real build would use Azure Functions, SQL, and
+              identity to secure this technician portal.
+            </p>
           </footer>
         </>
       )}
