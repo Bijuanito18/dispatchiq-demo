@@ -1,6 +1,61 @@
+import { useState } from 'react';
 import './app.css';
 
+const MOCK_JOBS = [
+  {
+    id: 'RO-2417',
+    customer: 'DFW Grocery Distribution',
+    unitId: 'Trailer 408',
+    status: 'In Progress',
+    stage: 'Diagnostics',
+    eta: 'Today, 3:15 PM',
+    lastUpdate: 'Tech on site, checking compressor',
+  },
+  {
+    id: 'RO-2423',
+    customer: 'North Texas Produce',
+    unitId: 'Truck 17',
+    status: 'Completed',
+    stage: 'Closed',
+    eta: 'Completed 10:05 AM',
+    lastUpdate: 'PM complete, signed by customer',
+  },
+  {
+    id: 'RO-2430',
+    customer: 'Metro Delivery Co',
+    unitId: 'Dock Unit #3',
+    status: 'Scheduled',
+    stage: 'Waiting to Dispatch',
+    eta: 'Tomorrow, 9:00 AM',
+    lastUpdate: 'Assigned to Javier, parts verified in stock',
+  },
+];
+
+function findJob(query) {
+  if (!query) return null;
+  const normalized = query.trim().toLowerCase();
+  return (
+    MOCK_JOBS.find(
+      (job) =>
+        job.id.toLowerCase() === normalized ||
+        job.unitId.toLowerCase() === normalized
+    ) || null
+  );
+}
+
 function App() {
+  const [view, setView] = useState('customer'); // 'customer' | 'tech'
+  const [statusQuery, setStatusQuery] = useState('');
+  const [statusResult, setStatusResult] = useState(null);
+  const [statusSearched, setStatusSearched] = useState(false);
+
+  const handleStatusSubmit = (e) => {
+    e.preventDefault();
+    const job = findJob(statusQuery);
+    setStatusResult(job);
+    setStatusSearched(true);
+  };
+
   return (
     <div className="app">
       {/* Top Bar */}
@@ -9,211 +64,305 @@ function App() {
           <span className="logo-mark">NTFR</span>
           <div className="logo-text">
             <span>North Texas Fleet & Refrigeration</span>
-            <small>Powered by DispatchIQ</small>
+            <small>Since 2010 · DFW Metroplex</small>
           </div>
         </div>
+
         <nav className="nav">
-          <a href="#overview">Overview</a>
-          <a href="#features">Features</a>
-          <a href="#workflow">Workflow</a>
-          <a href="#benefits">Benefits</a>
+          <button
+            className={`nav-link ${view === 'customer' ? 'active' : ''}`}
+            onClick={() => setView('customer')}
+          >
+            Customer Home
+          </button>
+          <a href="#about" className="nav-link">
+            About NTFR
+          </a>
+          <a href="#service" className="nav-link">
+            Service Promise
+          </a>
+          <button
+            className={`nav-link ${view === 'tech' ? 'active' : ''}`}
+            onClick={() => setView('tech')}
+          >
+            Technician & Parts Portal
+          </button>
         </nav>
       </header>
 
-      {/* Hero Section */}
-      <main className="hero" id="overview">
-        <div className="hero-text">
-          <h1>
-            Streamlined Dispatch & Maintenance
-            <span className="accent"> for NTFR</span>
-          </h1>
-          <p className="hero-subtitle">
-            DispatchIQ replaces paper logs, phone calls, and spreadsheets with a
-            single web-based hub for technicians, dispatchers, and office staff.
-          </p>
+      {view === 'customer' ? (
+        <>
+          {/* Hero + Status Panel */}
+          <main className="hero" id="overview">
+            <div className="hero-text">
+              <h1>
+                Keeping Your Cold Chain Moving
+                <span className="accent"> with NTFR & DispatchIQ</span>
+              </h1>
+              <p className="hero-subtitle">
+                North Texas Fleet & Refrigeration specializes in refrigerated
+                trailer and HVAC repair for delivery fleets across the DFW
+                area. Use this portal to check the status of your unit and see
+                how we keep your loads protected.
+              </p>
 
-          <div className="hero-actions">
-            <a href="#workflow" className="btn primary">
-              See How It Works
-            </a>
-            <a href="#features" className="btn ghost">
-              View Key Features
-            </a>
-          </div>
-
-          <div className="hero-stats">
-            <div>
-              <strong>20+</strong>
-              <span>Technicians & staff</span>
-            </div>
-            <div>
-              <strong>Real-time</strong>
-              <span>Job status updates</span>
-            </div>
-            <div>
-              <strong>Less paper</strong>
-              <span>More visibility</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Simple “Dashboard” Mock */}
-        <div className="hero-card">
-          <div className="card-header">
-            <span className="dot red" />
-            <span className="dot yellow" />
-            <span className="dot green" />
-            <span className="card-title">Today&apos;s Jobs</span>
-          </div>
-          <div className="card-body">
-            <div className="job-row">
-              <span className="badge open">Assigned</span>
-              <div className="job-main">
-                <strong>Route 12 – Trailer 408</strong>
-                <small>Reefer won&apos;t hold temp – Dispatch to Javier</small>
+              <div className="hero-stats">
+                <div>
+                  <strong>24/7</strong>
+                  <span>Emergency support</span>
+                </div>
+                <div>
+                  <strong>15+ years</strong>
+                  <span>Serving North Texas</span>
+                </div>
+                <div>
+                  <strong>Fleet focus</strong>
+                  <span>Trailers · Trucks · Docks</span>
+                </div>
               </div>
-              <span className="job-meta">08:30</span>
             </div>
-            <div className="job-row">
-              <span className="badge inprogress">In Progress</span>
-              <div className="job-main">
-                <strong>Store #241 – Dock Unit</strong>
-                <small>Compressor diagnostics – Parts on truck</small>
+
+            {/* Customer Status Card */}
+            <div className="status-card">
+              <h2>Check Your Unit or Repair Order</h2>
+              <p className="status-help">
+                Enter your <strong>Repair Order #</strong> (RO-2417) or{' '}
+                <strong>Unit ID</strong> (e.g. Trailer 408).
+              </p>
+
+              <form className="status-form" onSubmit={handleStatusSubmit}>
+                <input
+                  type="text"
+                  className="status-input"
+                  placeholder="e.g. RO-2417 or Trailer 408"
+                  value={statusQuery}
+                  onChange={(e) => setStatusQuery(e.target.value)}
+                />
+                <button type="submit" className="btn primary full">
+                  View Status
+                </button>
+              </form>
+
+              <div className="status-result">
+                {!statusSearched && (
+                  <p className="status-muted">
+                    Status updates are near real-time. For urgent issues, please
+                    call our dispatch line.
+                  </p>
+                )}
+
+                {statusSearched && !statusResult && (
+                  <div className="status-panel warning">
+                    <strong>We couldn&apos;t find that order yet.</strong>
+                    <p>
+                      Please verify the Repair Order or Unit ID on your
+                      paperwork. If you still can&apos;t find it, call dispatch
+                      and we&apos;ll look it up for you.
+                    </p>
+                  </div>
+                )}
+
+                {statusResult && (
+                  <div className="status-panel ok">
+                    <div className="status-header">
+                      <div>
+                        <span className="status-label">Repair Order</span>
+                        <h3>{statusResult.id}</h3>
+                      </div>
+                      <span className="badge inprogress">
+                        {statusResult.status}
+                      </span>
+                    </div>
+
+                    <div className="status-grid">
+                      <div>
+                        <span className="status-label">Customer</span>
+                        <p>{statusResult.customer}</p>
+                      </div>
+                      <div>
+                        <span className="status-label">Unit</span>
+                        <p>{statusResult.unitId}</p>
+                      </div>
+                      <div>
+                        <span className="status-label">Current Stage</span>
+                        <p>{statusResult.stage}</p>
+                      </div>
+                      <div>
+                        <span className="status-label">Estimated Timing</span>
+                        <p>{statusResult.eta}</p>
+                      </div>
+                    </div>
+
+                    <div className="status-note">
+                      <span className="status-label">Last Update</span>
+                      <p>{statusResult.lastUpdate}</p>
+                    </div>
+                  </div>
+                )}
               </div>
-              <span className="job-meta">09:15</span>
             </div>
-            <div className="job-row">
-              <span className="badge complete">Completed</span>
-              <div className="job-main">
-                <strong>Fleet PM – Truck #17</strong>
-                <small>Planned maintenance – Logged & signed</small>
+          </main>
+
+          {/* About Section */}
+          <section id="about" className="section">
+            <h2>About North Texas Fleet & Refrigeration</h2>
+            <p className="section-intro">
+              NTFR started as a small, two-truck operation focused on keeping
+              local delivery fleets moving, no matter the weather. Today, we
+              support regional carriers, grocers, and distributors across the
+              DFW metroplex with fast, reliable refrigerated unit repair.
+            </p>
+
+            <div className="grid">
+              <div className="card">
+                <h3>Reefer & HVAC Specialists</h3>
+                <p>
+                  Our technicians focus on refrigerated trailers, truck-mounted
+                  units, and dock equipment. That focus means faster
+                  diagnostics, better repairs, and less downtime.
+                </p>
               </div>
-              <span className="job-meta">10:05</span>
+              <div className="card">
+                <h3>Local, Family-Owned</h3>
+                <p>
+                  Based in North Texas, we understand the demands of regional
+                  delivery schedules, traffic, and heat. We treat every load
+                  like it&apos;s our own.
+                </p>
+              </div>
+              <div className="card">
+                <h3>Data-Backed Operations</h3>
+                <p>
+                  With DispatchIQ, we track jobs, response times, and repeat
+                  issues so we can continually improve how we serve your fleet.
+                </p>
+              </div>
             </div>
-          </div>
-        </div>
-      </main>
+          </section>
 
-      {/* Features Section */}
-      <section id="features" className="section">
-        <h2>Key Features</h2>
-        <p className="section-intro">
-          DispatchIQ focuses on the real problems NTFR faces every day: lost
-          paperwork, unclear job statuses, and slow communication between
-          dispatch and technicians.
-        </p>
-
-        <div className="grid">
-          <div className="card">
-            <h3>Centralized Job Board</h3>
-            <p>
-              All active jobs in one place with status, assigned tech, location,
-              and priority. No more digging through texts and Excel sheets.
-            </p>
-          </div>
-          <div className="card">
-            <h3>Technician View</h3>
-            <p>
-              Techs can see their daily schedule, job details, and log work
-              performed directly from their phone or tablet.
-            </p>
-          </div>
-          <div className="card">
-            <h3>Real-Time Updates</h3>
-            <p>
-              Dispatch sees when a job is assigned, in progress, or completed
-              instantly, reducing call-backs and “where&apos;s my tech?” calls.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Workflow Section */}
-      <section id="workflow" className="section alt">
-        <h2>How DispatchIQ Fits Into NTFR&apos;s Day</h2>
-        <div className="timeline">
-          <div className="step">
-            <div className="step-circle">1</div>
-            <div className="step-body">
-              <h3>Customer Call / Request</h3>
-              <p>
-                Office staff logs the service request into DispatchIQ instead of
-                writing it on paper or in a spreadsheet.
-              </p>
+          {/* Service Promise Section */}
+          <section id="service" className="section alt">
+            <h2>Our Service Promise to Your Fleet</h2>
+            <div className="grid">
+              <div className="card">
+                <h3>Clear Communication</h3>
+                <p>
+                  You&apos;ll always know what&apos;s happening with your unit:
+                  when we&apos;re dispatched, on site, diagnosing, and
+                  completed—no more guessing or chasing updates.
+                </p>
+              </div>
+              <div className="card">
+                <h3>Safety & Food Integrity</h3>
+                <p>
+                  We understand how critical temperature control is. Our
+                  priority is protecting your loads and keeping your equipment
+                  operating within spec.
+                </p>
+              </div>
+              <div className="card">
+                <h3>Partnership Mindset</h3>
+                <p>
+                  We&apos;re not just a one-off repair shop. We aim to be your
+                  long-term maintenance partner, helping prevent breakdowns
+                  before they happen.
+                </p>
+              </div>
             </div>
-          </div>
+          </section>
 
-          <div className="step">
-            <div className="step-circle">2</div>
-            <div className="step-body">
-              <h3>Job Assignment</h3>
-              <p>
-                Dispatch assigns a technician with the right skills and
-                location. The tech gets the job instantly on their device.
-              </p>
-            </div>
-          </div>
-
-          <div className="step">
-            <div className="step-circle">3</div>
-            <div className="step-body">
-              <h3>On-Site Work & Notes</h3>
-              <p>
-                The technician updates status, adds notes, and records parts
-                used. Everything is stored in one system of record.
-              </p>
-            </div>
-          </div>
-
-          <div className="step">
-            <div className="step-circle">4</div>
-            <div className="step-body">
-              <h3>Completion & Reporting</h3>
-              <p>
-                Dispatch and office staff can see work completed, create
-                invoices faster, and track repeat issues by customer or unit.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section id="benefits" className="section">
-        <h2>Why This Matters for NTFR</h2>
-        <div className="grid">
-          <div className="card">
-            <h3>Less Chaos</h3>
+          <footer className="footer">
             <p>
-              Reduce missed jobs, duplicate work, and lost notes from paper
-              tickets and separate spreadsheets.
+              Customer portal demo for{' '}
+              <strong>North Texas Fleet & Refrigeration</strong>. For real-time
+              assistance, please contact our dispatch line.
             </p>
-          </div>
-          <div className="card">
-            <h3>Faster Response</h3>
-            <p>
-              Dispatch has real-time visibility, so jobs get to the right tech
-              faster with fewer phone calls.
+          </footer>
+        </>
+      ) : (
+        <>
+          {/* Technician & Parts Portal View */}
+          <main className="section tech-section">
+            <h1>Technician &amp; Parts Portal</h1>
+            <p className="section-intro">
+              Internal view for NTFR technicians and parts coordinators. This
+              demo shows how repair orders, unit details, and parts status could
+              be tracked inside DispatchIQ.
             </p>
-          </div>
-          <div className="card">
-            <h3>Better Customer Experience</h3>
-            <p>
-              Clearer communication and faster service builds trust with
-              delivery fleets and store customers.
-            </p>
-          </div>
-        </div>
-      </section>
 
-      {/* Footer */}
-      <footer className="footer">
-        <p>
-          Demo concept for{' '}
-          <strong>North Texas Fleet & Refrigeration – DispatchIQ</strong>. Built
-          as part of an Azure solution design project.
-        </p>
-      </footer>
+            <div className="tech-grid">
+              <div className="card wide">
+                <h2>Active Repair Orders</h2>
+                <p className="table-caption">
+                  Filter by status to prioritize emergency calls and in-progress
+                  jobs.
+                </p>
+                <div className="table-wrapper">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>RO #</th>
+                        <th>Customer</th>
+                        <th>Unit</th>
+                        <th>Status</th>
+                        <th>Stage</th>
+                        <th>ETA / Target</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {MOCK_JOBS.map((job) => (
+                        <tr key={job.id}>
+                          <td>{job.id}</td>
+                          <td>{job.customer}</td>
+                          <td>{job.unitId}</td>
+                          <td>{job.status}</td>
+                          <td>{job.stage}</td>
+                          <td>{job.eta}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="tech-side">
+                <div className="card">
+                  <h3>Parts &amp; Inventory Notes</h3>
+                  <ul className="bullet-list">
+                    <li>Common reefer compressors stocked in main warehouse.</li>
+                    <li>
+                      Critical seals, filters, and belts pre-kitted for PM
+                      services.
+                    </li>
+                    <li>
+                      Backordered or special-order parts flagged and tied to RO
+                      for follow-up.
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="card">
+                  <h3>Technician Workflow (High Level)</h3>
+                  <ol className="step-list">
+                    <li>Review assigned ROs and confirm parts on hand.</li>
+                    <li>Update status to On Route / On Site from mobile.</li>
+                    <li>Capture diagnostics, temperature readings, and photos.</li>
+                    <li>Record parts used and recommendations for follow-up.</li>
+                    <li>Mark job as Completed and notify dispatch.</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </main>
+
+          <footer className="footer">
+            <p>
+              Internal tools view for NTFR staff. Not for customer use. Access
+              can be restricted with authentication in a production system.
+            </p>
+          </footer>
+        </>
+      )}
     </div>
   );
 }
