@@ -427,7 +427,7 @@ function App() {
             {/* Top header bar */}
             <div className="tech-header">
               <div>
-                <h1>DispatchIQ Demo – NTFR</h1>
+                <h1>NTFR Tech Portal (test)</h1>
                 <p className="section-intro small">
                   Create &amp; assign work orders, track status, manage parts, and keep your
                   cold chain moving.
