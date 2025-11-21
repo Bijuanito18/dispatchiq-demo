@@ -349,32 +349,7 @@ function App() {
           </main>
 
           {/* ABOUT NTFR (short version) */}
-          <section className="section">
-            <h2>About North Texas Fleet &amp; Refrigeration</h2>
-            <p className="section-intro">
-              NTFR started as a small two-truck operation focused on keeping
-              local delivery fleets running. Today we support carriers,
-              distributors, and grocers across North Texas.
-            </p>
-
-            <div className="grid">
-              <div className="card">
-                <h3>Reefer &amp; HVAC Specialists</h3>
-                <p>
-                  Our techs focus on refrigerated trailers, truck units, and dock
-                  equipment. That focus means faster diagnostics and less
-                  downtime.
-                </p>
-              </div>
-              <div className="card">
-                <h3>Local, Family-Owned</h3>
-                <p>
-                  Based in North Texas, we understand the heat, traffic, and
-                  schedules your fleet faces every day.
-                </p>
-              </div>
-            </div>
-          </section>
+          
 
           {/* SERVICE PROMISE (still on homepage, no nav link) */}
           <section className="section alt">
@@ -410,47 +385,43 @@ function App() {
         </>
       )}
 
-      {/* OPS / ABOUT PAGE */}
-      {view === 'ops' && (
-        <>
-          <main className="section">
-            <h1>Operations &amp; Data with DispatchIQ</h1>
-            <p className="section-intro">
-              Behind the scenes, NTFR uses DispatchIQ to track work orders,
-              response times, and repeat issues. That data helps us keep your
-              fleet on the road.
-            </p>
+      {/* OPS / ABOUT PAGE */}     
+{view === 'ops' && (
+  <>
+    <main className="section">
+      <h1>About North Texas Fleet &amp; Refrigeration</h1>
+      <p className="section-intro">
+        NTFR started as a small two-truck operation focused on keeping
+        local delivery fleets running. Today we support carriers,
+        distributors, and grocers across North Texas.
+      </p>
 
-            <div className="grid">
-              <div className="card">
-                <h3>Data-Backed Operations</h3>
-                <p>
-                  We track jobs, response times, and repeat failures so we can
-                  constantly improve how we serve your fleet.
-                </p>
-              </div>
-              <div className="card">
-                <h3>Visibility for Dispatch &amp; Office</h3>
-                <p>
-                  Dispatchers, techs, and office staff all work from the same
-                  real-time job board and history.
-                </p>
-              </div>
-              <div className="card">
-                <h3>Better Planning for Your Units</h3>
-                <p>
-                  By seeing which units fail most often and why, we can plan PMs
-                  and repairs when they impact you the least.
-                </p>
-              </div>
-            </div>
-          </main>
+      <div className="grid">
+        <div className="card">
+          <h3>Reefer &amp; HVAC Specialists</h3>
+          <p>
+            Our techs focus on refrigerated trailers, truck units, and dock
+            equipment. That focus means faster diagnostics and less
+            downtime.
+          </p>
+        </div>
 
-          <footer className="footer">
-            <p>Internal operations page for NTFR (demo).</p>
-          </footer>
-        </>
-      )}
+        <div className="card">
+          <h3>Local, Family-Owned</h3>
+          <p>
+            Based in North Texas, we understand the heat, traffic, and
+            schedules your fleet faces every day.
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <footer className="footer">
+      <p>Learn more about the history & mission of NTFR.</p>
+    </footer>
+  </>
+)}
+
 
       {/* TECH & PARTS PORTAL */}
       {view === 'tech' && (
