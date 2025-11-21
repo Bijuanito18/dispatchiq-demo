@@ -1,0 +1,10 @@
+{
+  "name": "dispatchiq-demo-functions",
+  "version": "0.0.1",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "func start"
+  },
+  "dependencies": {}
+}
