@@ -12,6 +12,10 @@ const INITIAL_WORK_ORDERS = [
     lastUpdate: 'Tech on site, checking compressor',
     assignedTech: 'Javier M',
     priority: 'High',
+    clockStatus: 'On Job',
+    internalNotes: 'Customer reports intermittent warm temps at dock.',
+    photos: 2,
+    partsUsed: ['P-1001'],
   },
   {
     id: 'RO-2423',
@@ -23,6 +27,10 @@ const INITIAL_WORK_ORDERS = [
     lastUpdate: 'PM complete, signed by customer',
     assignedTech: 'Ashley R',
     priority: 'Normal',
+    clockStatus: 'Completed',
+    internalNotes: 'Full PM service, no follow-up needed.',
+    photos: 1,
+    partsUsed: [],
   },
   {
     id: 'RO-2430',
@@ -34,6 +42,10 @@ const INITIAL_WORK_ORDERS = [
     lastUpdate: 'Assigned to Javier, parts verified in stock',
     assignedTech: 'Unassigned',
     priority: 'Normal',
+    clockStatus: 'Not Started',
+    internalNotes: '',
+    photos: 0,
+    partsUsed: [],
   },
 ];
 
@@ -111,7 +123,10 @@ function App() {
   const [statusResult, setStatusResult] = useState(null);
   const [statusSearched, setStatusSearched] = useState(false);
 
-  const [techTab, setTechTab] = useState('dashboard'); // 'dashboard' | 'workorders' | 'technicians' | 'parts'
+  const [techTab, setTechTab] = useState('workorders'); // 'dashboard' | 'workorders' | 'technicians' | 'parts'
+  const [selectedOrderId, setSelectedOrderId] = useState(
+    INITIAL_WORK_ORDERS[0]?.id || null
+  );
 
   const [newOrder, setNewOrder] = useState({
     customer: '',
@@ -130,6 +145,14 @@ function App() {
   ).length;
   const lowStockCount = parts.filter((p) => p.inStock < p.minStock).length;
 
+  const dispatchQueue = workOrders.filter(
+    (w) => w.status === 'Open' && (!w.assignedTech || w.assignedTech === 'Unassigned')
+  );
+
+  const selectedOrder =
+    workOrders.find((w) => w.id === selectedOrderId) || null;
+
+  // Handlers
   const handleStatusSubmit = (e) => {
     e.preventDefault();
     const job = findJobByQuery(workOrders, statusQuery);
@@ -158,10 +181,13 @@ function App() {
       lastUpdate: 'Scheduled via portal',
       assignedTech: newOrder.assignedTech || 'Unassigned',
       priority: newOrder.priority || 'Normal',
+      clockStatus: 'Not Started',
+      internalNotes: '',
+      photos: 0,
+      partsUsed: [],
     };
 
     setWorkOrders((prev) => [order, ...prev]);
-
     setNewOrder({
       customer: '',
       unitId: '',
@@ -169,33 +195,73 @@ function App() {
       assignedTech: '',
       priority: 'Normal',
     });
+    setSelectedOrderId(order.id);
+  };
+
+  const updateOrder = (id, patchFn) => {
+    setWorkOrders((prev) =>
+      prev.map((wo) => (wo.id === id ? patchFn(wo) : wo))
+    );
   };
 
   const handleOrderStatusChange = (id, status) => {
-    setWorkOrders((prev) =>
-      prev.map((wo) => (wo.id === id ? { ...wo, status } : wo))
-    );
+    updateOrder(id, (wo) => ({
+      ...wo,
+      status,
+      lastUpdate: `Status updated to ${status} via portal`,
+    }));
   };
 
   const handleOrderStageChange = (id, stage) => {
-    setWorkOrders((prev) =>
-      prev.map((wo) => (wo.id === id ? { ...wo, stage } : wo))
-    );
+    updateOrder(id, (wo) => ({
+      ...wo,
+      stage,
+      lastUpdate: `Stage changed to ${stage} via portal`,
+    }));
   };
 
   const handleOrderAssignTech = (id, techName) => {
-    setWorkOrders((prev) =>
-      prev.map((wo) =>
-        wo.id === id ? { ...wo, assignedTech: techName || 'Unassigned' } : wo
-      )
-    );
+    updateOrder(id, (wo) => ({
+      ...wo,
+      assignedTech: techName || 'Unassigned',
+      lastUpdate: techName
+        ? `Assigned to ${techName}`
+        : 'Unassigned from technician',
+    }));
+  };
+
+  const handleOrderNotesChange = (id, notes) => {
+    updateOrder(id, (wo) => ({ ...wo, internalNotes: notes }));
+  };
+
+  const handleToggleClock = (id) => {
+    updateOrder(id, (wo) => {
+      const next =
+        wo.clockStatus === 'On Job' || wo.clockStatus === 'Completed'
+          ? 'Not Started'
+          : 'On Job';
+      return {
+        ...wo,
+        clockStatus: next,
+        lastUpdate:
+          next === 'On Job'
+            ? 'Tech clocked in via portal'
+            : 'Tech clocked out via portal',
+      };
+    });
+  };
+
+  const handleMockPhotoUpload = (id) => {
+    updateOrder(id, (wo) => ({
+      ...wo,
+      photos: (wo.photos || 0) + 1,
+      lastUpdate: 'Photo attached (demo)',
+    }));
   };
 
   const handlePartsOrder = (id) => {
     setParts((prev) =>
-      prev.map((p) =>
-        p.id === id ? { ...p, inStock: p.inStock + 1 } : p
-      )
+      prev.map((p) => (p.id === id ? { ...p, inStock: p.inStock + 1 } : p))
     );
   };
 
@@ -207,6 +273,15 @@ function App() {
           : p
       )
     );
+  };
+
+  const handleUsePartForOrder = (orderId, partId) => {
+    handlePartsUse(partId);
+    updateOrder(orderId, (wo) => ({
+      ...wo,
+      partsUsed: [...(wo.partsUsed || []), partId],
+      lastUpdate: 'Part usage logged on this RO',
+    }));
   };
 
   return (
@@ -273,6 +348,7 @@ function App() {
               </div>
             </div>
 
+            {/* CUSTOMER STATUS CARD */}
             <div className="status-card">
               <h2>Check Your Unit or Repair Order</h2>
               <p className="status-help">
@@ -351,6 +427,7 @@ function App() {
             </div>
           </main>
 
+          {/* SERVICE PROMISE */}
           <section className="section alt">
             <h2>Our Service Promise</h2>
             <div className="grid">
@@ -424,24 +501,22 @@ function App() {
       {view === 'tech' && (
         <>
           <main className="section tech-section">
-            {/* Top header bar */}
+            {/* Header */}
             <div className="tech-header">
               <div>
-                <h1>NTFR Tech Portal (test)</h1>
+                <h1>DispatchIQ Demo – NTFR</h1>
                 <p className="section-intro small">
-                  Create &amp; assign work orders, track status, manage parts, and keep your
-                  cold chain moving.
+                  Internal tools for managing work orders, technicians, and parts.
                 </p>
               </div>
               <div className="tech-actions">
-                <button className="btn subtle">+ New Work Order</button>
                 <button className="btn subtle">Import</button>
                 <button className="btn subtle">Export</button>
                 <button className="btn subtle">Reset</button>
               </div>
             </div>
 
-            {/* Tabs + search */}
+            {/* Tabs */}
             <div className="tech-tabs-row">
               <div className="tech-tabs">
                 <button
@@ -477,14 +552,6 @@ function App() {
                   Dashboard
                 </button>
               </div>
-
-              <div className="tech-search">
-                <input
-                  className="status-input"
-                  placeholder="Search (demo only)"
-                  disabled
-                />
-              </div>
             </div>
 
             {/* Low stock alerts strip */}
@@ -508,8 +575,8 @@ function App() {
             {techTab === 'dashboard' && (
               <section className="summary-row">
                 <div className="summary-card">
-                  <span className="summary-label">Total Work Orders</span>
-                  <strong>{workOrders.length}</strong>
+                  <span className="summary-label">Open</span>
+                  <strong>{openCount}</strong>
                 </div>
                 <div className="summary-card">
                   <span className="summary-label">In Progress</span>
@@ -520,138 +587,138 @@ function App() {
                   <strong>{completedCount}</strong>
                 </div>
                 <div className="summary-card">
-                  <span className="summary-label">Low Stock Items</span>
+                  <span className="summary-label">Low Stock Parts</span>
                   <strong>{lowStockCount}</strong>
+                </div>
+
+                <div className="summary-card">
+                  <span className="summary-label">Dispatch Queue</span>
+                  <strong>{dispatchQueue.length}</strong>
+                  <small>Open ROs with no tech</small>
                 </div>
               </section>
             )}
 
-            {/* WORK ORDERS TAB */}
+            {/* WORK ORDERS TAB – COLUMN LAYOUT */}
             {techTab === 'workorders' && (
-              <section className="wo-board">
-                {workOrders.map((wo) => (
-                  <article className="wo-card" key={wo.id}>
-                    <header className="wo-header">
-                      <div>
-                        <h2>{wo.id}</h2>
-                        <p className="wo-title">
-                          {wo.customer} · {wo.unitId}
-                        </p>
-                      </div>
-                      <div className="wo-header-right">
-                        <span className="pill pill-status">{wo.status}</span>
-                        <span className="pill pill-stage">{wo.stage}</span>
-                      </div>
-                    </header>
+              <section className="tech-grid">
+                {/* LEFT: Work order list + new form */}
+                <div className="card">
+                  <h2>Repair Orders</h2>
+                  <p className="table-caption">
+                    Tap a row to view details, notes, and parts usage.
+                  </p>
+                  <div className="table-wrapper">
+                    <table className="data-table">
+                      <thead>
+                        <tr>
+                          <th>RO #</th>
+                          <th>Customer</th>
+                          <th>Unit</th>
+                          <th>Status</th>
+                          <th>Stage</th>
+                          <th>Tech</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {workOrders.map((wo) => (
+                          <tr
+                            key={wo.id}
+                            className={
+                              wo.id === selectedOrderId ? 'row-selected' : ''
+                            }
+                            onClick={() => setSelectedOrderId(wo.id)}
+                          >
+                            <td>{wo.id}</td>
+                            <td>{wo.customer}</td>
+                            <td>{wo.unitId}</td>
+                            <td>
+                              <select
+                                value={wo.status}
+                                onChange={(e) =>
+                                  handleOrderStatusChange(
+                                    wo.id,
+                                    e.target.value
+                                  )
+                                }
+                              >
+                                <option value="Open">Open</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Completed">Completed</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select
+                                value={wo.stage}
+                                onChange={(e) =>
+                                  handleOrderStageChange(
+                                    wo.id,
+                                    e.target.value
+                                  )
+                                }
+                              >
+                                <option>Scheduled</option>
+                                <option>On Route</option>
+                                <option>On Site</option>
+                                <option>Diagnostics</option>
+                                <option>Repair</option>
+                                <option>Closed</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select
+                                value={wo.assignedTech}
+                                onChange={(e) =>
+                                  handleOrderAssignTech(
+                                    wo.id,
+                                    e.target.value
+                                  )
+                                }
+                              >
+                                <option value="Unassigned">Unassigned</option>
+                                {techs.map((t) => (
+                                  <option key={t.id} value={t.name}>
+                                    {t.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
 
-                    <div className="wo-meta">
-                      <div>
-                        <span className="summary-label">ETA</span>
-                        <p>{wo.eta}</p>
-                      </div>
-                      <div>
-                        <span className="summary-label">Priority</span>
-                        <p>{wo.priority}</p>
-                      </div>
-                    </div>
-
-                    <div className="wo-controls">
-                      <div className="wo-control">
-                        <label>Status</label>
-                        <select
-                          value={wo.status}
-                          onChange={(e) =>
-                            handleOrderStatusChange(wo.id, e.target.value)
-                          }
-                        >
-                          <option value="Open">Open</option>
-                          <option value="In Progress">In Progress</option>
-                          <option value="Completed">Completed</option>
-                        </select>
-                      </div>
-
-                      <div className="wo-control">
-                        <label>Stage</label>
-                        <select
-                          value={wo.stage}
-                          onChange={(e) =>
-                            handleOrderStageChange(wo.id, e.target.value)
-                          }
-                        >
-                          <option>Scheduled</option>
-                          <option>On Route</option>
-                          <option>On Site</option>
-                          <option>Diagnostics</option>
-                          <option>Repair</option>
-                          <option>Closed</option>
-                        </select>
-                      </div>
-
-                      <div className="wo-control">
-                        <label>Technician</label>
-                        <select
-                          value={wo.assignedTech}
-                          onChange={(e) =>
-                            handleOrderAssignTech(wo.id, e.target.value)
-                          }
-                        >
-                          <option value="Unassigned">Unassigned</option>
-                          {techs.map((t) => (
-                            <option key={t.id} value={t.name}>
-                              {t.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-
-                {/* New work order card */}
-                <article className="wo-card new-wo-card">
-                  <header className="wo-header">
-                    <div>
-                      <h2>New Work Order</h2>
-                      <p className="wo-title">Schedule a unit for service</p>
-                    </div>
-                  </header>
-
-                  <form className="wo-controls" onSubmit={handleNewOrderSubmit}>
-                    <div className="wo-control">
-                      <label>Customer</label>
+                  <div className="card" style={{ marginTop: '1.5rem' }}>
+                    <h3>New Work Order</h3>
+                    <form
+                      className="status-form"
+                      onSubmit={handleNewOrderSubmit}
+                    >
                       <input
                         className="status-input"
+                        placeholder="Customer name"
                         value={newOrder.customer}
                         onChange={(e) =>
                           handleNewOrderChange('customer', e.target.value)
                         }
-                        placeholder="Customer name"
                       />
-                    </div>
-                    <div className="wo-control">
-                      <label>Unit</label>
                       <input
                         className="status-input"
+                        placeholder="Unit (Trailer 410, Truck 22, etc.)"
                         value={newOrder.unitId}
                         onChange={(e) =>
                           handleNewOrderChange('unitId', e.target.value)
                         }
-                        placeholder="Trailer / Truck / Dock"
                       />
-                    </div>
-                    <div className="wo-control">
-                      <label>ETA / Scheduled</label>
                       <input
                         className="status-input"
+                        placeholder="ETA / Scheduled time"
                         value={newOrder.eta}
                         onChange={(e) =>
                           handleNewOrderChange('eta', e.target.value)
                         }
-                        placeholder="e.g. Today 3:30 PM"
                       />
-                    </div>
-                    <div className="wo-control">
-                      <label>Technician</label>
                       <select
                         className="status-input"
                         value={newOrder.assignedTech}
@@ -659,16 +726,13 @@ function App() {
                           handleNewOrderChange('assignedTech', e.target.value)
                         }
                       >
-                        <option value="">Unassigned</option>
+                        <option value="">Assign technician (optional)</option>
                         {techs.map((t) => (
                           <option key={t.id} value={t.name}>
                             {t.name}
                           </option>
                         ))}
                       </select>
-                    </div>
-                    <div className="wo-control">
-                      <label>Priority</label>
                       <select
                         className="status-input"
                         value={newOrder.priority}
@@ -680,42 +744,215 @@ function App() {
                         <option value="High">High</option>
                         <option value="Critical">Critical</option>
                       </select>
-                    </div>
+                      <button type="submit" className="btn primary full">
+                        Add Work Order
+                      </button>
+                    </form>
+                  </div>
+                </div>
 
-                    <button type="submit" className="btn primary full">
-                      Add Work Order
-                    </button>
-                  </form>
-                </article>
-              </section>
-            )}
-
-            {/* TECHNICIANS TAB */}
-            {techTab === 'technicians' && (
-              <section className="tech-card-row">
-                {techs.map((t) => (
-                  <article key={t.id} className="tech-card">
-                    <header className="tech-card-header">
-                      <h2>{t.name}</h2>
-                      <span
-                        className={`pill ${
-                          t.status === 'On Job' ? 'pill-status' : 'pill-ok'
-                        }`}
-                      >
-                        {t.status}
-                      </span>
-                    </header>
-                    <p className="tech-role">Reefer / HVAC Technician</p>
-                    <p className="summary-label">
-                      Current RO: {t.currentOrder || 'None'}
+                {/* RIGHT: Details panel */}
+                <div className="card">
+                  <h2>Order Details</h2>
+                  {!selectedOrder && (
+                    <p className="table-caption">
+                      Select a repair order on the left to see details.
                     </p>
-                    <p className="summary-label">Location: {t.location}</p>
-                  </article>
-                ))}
+                  )}
+
+                  {selectedOrder && (
+                    <>
+                      <div className="status-header">
+                        <div>
+                          <span className="status-label">Repair Order</span>
+                          <h3>{selectedOrder.id}</h3>
+                        </div>
+                        <span className="badge inprogress">
+                          {selectedOrder.status}
+                        </span>
+                      </div>
+
+                      <div className="status-grid">
+                        <div>
+                          <span className="status-label">Customer</span>
+                          <p>{selectedOrder.customer}</p>
+                        </div>
+                        <div>
+                          <span className="status-label">Unit</span>
+                          <p>{selectedOrder.unitId}</p>
+                        </div>
+                        <div>
+                          <span className="status-label">Stage</span>
+                          <p>{selectedOrder.stage}</p>
+                        </div>
+                        <div>
+                          <span className="status-label">ETA</span>
+                          <p>{selectedOrder.eta}</p>
+                        </div>
+                      </div>
+
+                      <div className="status-grid">
+                        <div>
+                          <span className="status-label">Technician</span>
+                          <p>{selectedOrder.assignedTech}</p>
+                        </div>
+                        <div>
+                          <span className="status-label">Priority</span>
+                          <p>{selectedOrder.priority}</p>
+                        </div>
+                        <div>
+                          <span className="status-label">Clock Status</span>
+                          <p>{selectedOrder.clockStatus || 'Not Started'}</p>
+                        </div>
+                        <div>
+                          <button
+                            type="button"
+                            className="btn subtle full"
+                            onClick={() => handleToggleClock(selectedOrder.id)}
+                          >
+                            {selectedOrder.clockStatus === 'On Job'
+                              ? 'Clock Out'
+                              : 'Clock In (demo)'}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="status-note">
+                        <span className="status-label">Internal Notes</span>
+                        <textarea
+                          className="status-input"
+                          rows={4}
+                          value={selectedOrder.internalNotes || ''}
+                          onChange={(e) =>
+                            handleOrderNotesChange(
+                              selectedOrder.id,
+                              e.target.value
+                            )
+                          }
+                          placeholder="Tech / dispatcher notes for this RO..."
+                        />
+                      </div>
+
+                      <div className="status-note">
+                        <span className="status-label">
+                          Photos (demo only)
+                        </span>
+                        <p>{selectedOrder.photos || 0} attached</p>
+                        <button
+                          type="button"
+                          className="btn subtle"
+                          onClick={() => handleMockPhotoUpload(selectedOrder.id)}
+                        >
+                          Attach Photo (demo)
+                        </button>
+                      </div>
+
+                      <div className="status-note">
+                        <span className="status-label">Timeline (demo)</span>
+                        <ul className="bullet-list">
+                          <li>RO created & scheduled</li>
+                          <li>Stage: {selectedOrder.stage}</li>
+                          <li>Status: {selectedOrder.status}</li>
+                          <li>Last update: {selectedOrder.lastUpdate}</li>
+                        </ul>
+                      </div>
+
+                      <div className="status-note">
+                        <span className="status-label">Parts Used</span>
+                        <p className="table-caption">
+                          Log parts against this RO (also reduces inventory).
+                        </p>
+                        <div className="part-actions">
+                          {parts.map((p) => (
+                            <button
+                              key={p.id}
+                              type="button"
+                              className="mini-btn"
+                              onClick={() =>
+                                handleUsePartForOrder(selectedOrder.id, p.id)
+                              }
+                            >
+                              Use {p.name}
+                            </button>
+                          ))}
+                        </div>
+                        <ul className="bullet-list">
+                          {(selectedOrder.partsUsed || []).length === 0 && (
+                            <li>No parts logged yet.</li>
+                          )}
+                          {(selectedOrder.partsUsed || []).map(
+                            (pid, index) => {
+                              const part = parts.find((p) => p.id === pid);
+                              return (
+                                <li key={`${pid}-${index}`}>
+                                  {part ? part.name : pid}
+                                </li>
+                              );
+                            }
+                          )}
+                        </ul>
+                      </div>
+                    </>
+                  )}
+                </div>
               </section>
             )}
 
-            {/* PARTS TAB */}
+            {/* TECHNICIANS TAB – LIST STYLE */}
+            {techTab === 'technicians' && (
+              <section className="tech-grid">
+                <div className="card wide">
+                  <h2>Technician Board</h2>
+                  <p className="table-caption">
+                    Shows which job each tech is clocked into.
+                  </p>
+                  <div className="table-wrapper">
+                    <table className="data-table">
+                      <thead>
+                        <tr>
+                          <th>Tech</th>
+                          <th>Status</th>
+                          <th>Current RO</th>
+                          <th>Location</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {techs.map((t) => (
+                          <tr key={t.id}>
+                            <td>{t.name}</td>
+                            <td>{t.status}</td>
+                            <td>{t.currentOrder || '-'}</td>
+                            <td>{t.location}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div className="tech-side">
+                  <div className="card">
+                    <h3>Dispatch Queue</h3>
+                    <p className="table-caption">
+                      Open jobs with no technician assigned.
+                    </p>
+                    <ul className="bullet-list">
+                      {dispatchQueue.length === 0 && (
+                        <li>All open jobs are assigned.</li>
+                      )}
+                      {dispatchQueue.map((wo) => (
+                        <li key={wo.id}>
+                          <strong>{wo.id}</strong> – {wo.customer} (
+                          {wo.unitId})
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* PARTS TAB – CARD GRID (STYLE B) */}
             {techTab === 'parts' && (
               <section className="part-board">
                 {parts.map((p) => {
@@ -760,8 +997,8 @@ function App() {
 
           <footer className="footer">
             <p>
-              Demo only — a real build would use Azure Functions, SQL, and
-              identity to secure this technician portal.
+              Internal NTFR tools view (demo only). A real build would use Azure
+              Functions, SQL, and identity to secure this portal.
             </p>
           </footer>
         </>
